@@ -69,6 +69,8 @@ contract Casino {
 
    function resetData() {
      players.length = 0;
+     totalBet = 0;
+     numberOfBets = 0;
      // reset all bet counters to 0
      for(uint j = minBetNumber; j <= maxBetNumber; j++){
        amountBetPerNumber[j] = 0;
@@ -76,7 +78,7 @@ contract Casino {
    }
 
    function checkPlayerExists(address player) constant returns(bool){
-     for(uint i = 0; i <= players.length; i++) {
+     for(uint i = 0; i < players.length; i++) {
        if(players[i] == player) return true;
      }
      return false;
