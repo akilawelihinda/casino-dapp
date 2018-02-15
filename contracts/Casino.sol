@@ -18,20 +18,20 @@ contract Casino {
    mapping(address => Player) playerInfo;
    mapping(uint => uint) amountBetPerNumber;
 
-   function Casino(uint _minimumBet){
+   function Casino(uint _minimumBet) public {
       owner = msg.sender;
       minBetNumber = 1;
       maxBetNumber = 10;
       if(_minimumBet != 0) minimumBet = _minimumBet;
    }
 
-   function kill(){
+   function kill() public {
       if(msg.sender == owner)
          selfdestruct(owner);
    }
 
    // Lets a user bet on a number between 1 and 10
-   function bet(uint number) payable{
+   function bet(uint number) public payable {
      assert(checkPlayerExists(msg.sender) == false);
      assert(number>=minBetNumber && number<=maxBetNumber);
      assert(msg.value >= minimumBet);
@@ -48,12 +48,12 @@ contract Casino {
 
    // Generates a random number between 1 and 10
    // TODO: Very primitive random number generator. Make it more secure
-   function generateNumberWinner() {
+   function generateNumberWinner() private {
      uint random_num = block.number % 10 + 1;
      distributePrizes(random_num);
    }
 
-   function distributePrizes(uint winningNumber) {
+   function distributePrizes(uint winningNumber) private {
      for(uint i = 0; i <= players.length; i++){
        address playerAddress = players[i];
        if(playerInfo[playerAddress].numberSelected == winningNumber) {
@@ -67,7 +67,7 @@ contract Casino {
      resetData();
    }
 
-   function resetData() {
+   function resetData() private {
      players.length = 0;
      totalBet = 0;
      numberOfBets = 0;
@@ -77,7 +77,7 @@ contract Casino {
      }
    }
 
-   function checkPlayerExists(address player) constant returns(bool){
+   function checkPlayerExists(address player) public constant returns(bool){
      for(uint i = 0; i < players.length; i++) {
        if(players[i] == player) return true;
      }
@@ -86,5 +86,5 @@ contract Casino {
 
    // Fallback function in case someone sends ether to the contract so it
    // doesn't get lost
-   function() payable {}
+   function() public payable {}
 }
