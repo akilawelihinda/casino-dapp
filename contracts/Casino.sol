@@ -5,7 +5,7 @@ contract Casino {
    uint public minimumBet;
    uint public totalBet;
    uint public numberOfBets;
-   uint public maxAmountOfBets = 100;
+   uint public maxAmountOfBets = 7;
    uint public minBetNumber = 1;
    uint public maxBetNumber = 10;
    address[] players;
@@ -54,12 +54,12 @@ contract Casino {
    }
 
    function distributePrizes(uint winningNumber) private {
-     for(uint i = 0; i <= players.length; i++){
+     for(uint i = 0; i < players.length; i++){
        address playerAddress = players[i];
        if(playerInfo[playerAddress].numberSelected == winningNumber) {
          uint amountBet = playerInfo[playerAddress].amountBet;
          uint totalBetOnWinner = amountBetPerNumber[winningNumber];
-         uint winnings = (amountBet / totalBetOnWinner) * totalBet;
+         uint winnings = (amountBet * totalBet) / totalBetOnWinner;
          playerAddress.transfer(winnings);
        }
        delete playerInfo[playerAddress];

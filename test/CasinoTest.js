@@ -19,12 +19,29 @@ contract('Casino', function(accounts) {
     const casino = await Casino.new();
     const betAmt = 1;
     const betNumber = 4;
-    for(var i=0; i<accounts.length; i++) {
+    const playerCount = 4;
+    for(var i=0; i<playerCount; i++) {
       await casino.bet(betNumber, {from: accounts[i], value: betAmt});
     }
     const totalBet = await casino.totalBet.call();
-    assert.equal(totalBet.toNumber(), betAmt * accounts.length);
+    assert.equal(totalBet.toNumber(), betAmt * playerCount);
     const totalBetCount = await casino.numberOfBets.call();
-    assert.equal(totalBetCount.toNumber(), accounts.length);
+    assert.equal(totalBetCount.toNumber(), playerCount);
+  });
+
+  it("should reset player info after distributing winnings", async function() {
+    const casino = await Casino.new();
+    const betAmt = 1;
+    var betCount = await casino.maxAmountOfBets.call();
+    betCount = betCount.toNumber();
+    const betNumber = 4;
+    for(var i=0; i<betCount; i++) {
+      const index = i % accounts.length;
+      await casino.bet(betNumber, {from: accounts[index], value: betAmt});
+    }
+    const totalBet = await casino.totalBet.call();
+    assert.equal(totalBet.toNumber(), 0);
+    const totalBetCount = await casino.numberOfBets.call();
+    assert.equal(totalBetCount.toNumber(), 0);
   });
 });
