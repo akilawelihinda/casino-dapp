@@ -8,7 +8,10 @@ contract Casino {
    uint public maxAmountOfBets = 7;
    uint public minBetNumber = 1;
    uint public maxBetNumber = 10;
+   uint public prevWinningNumber = 0;
    address[] players;
+
+   event DistributePrize(address indexed to, uint value);
 
    struct Player {
      uint amountBet;
@@ -28,9 +31,7 @@ contract Casino {
    function kill() public {
       if(msg.sender == owner)
          selfdestruct(owner);
-   }
-
-   // Lets a user bet on a number between 1 and 10
+   } // Lets a user bet on a number between 1 and 10
    function bet(uint number) public payable {
      assert(checkPlayerExists(msg.sender) == false);
      assert(number>=minBetNumber && number<=maxBetNumber);
@@ -50,7 +51,24 @@ contract Casino {
    // TODO: Very primitive random number generator. Make it more secure
    function generateNumberWinner() private {
      uint random_num = block.number % 10 + 1;
-     distributePrizes(random_num);
+     uint winning_num = pickWinningNum(random_num);
+     distributePrizes(winning_num);
+   }
+
+   // Pick a winning number that was bet on
+   // NOTE: Very inefficient when the bet numbers have a big range
+   function pickWinningNum(uint random_num) private constant returns(uint){
+     uint winning_num = 0;
+     uint index = 0;
+     uint possibleNumbers = maxBetNumber - minBetNumber + 1;
+     while(random_num > 0) {
+       if(amountBetPerNumber[index] != 0) {
+         winning_num = index;
+         random_num--;
+       }
+       index = (index + 1) % possibleNumbers;
+     }
+     return winning_num + 1;
    }
 
    function distributePrizes(uint winningNumber) private {
@@ -61,10 +79,12 @@ contract Casino {
          uint totalBetOnWinner = amountBetPerNumber[winningNumber];
          uint winnings = (amountBet * totalBet) / totalBetOnWinner;
          playerAddress.transfer(winnings);
+         DistributePrize(playerAddress, winnings);
        }
        delete playerInfo[playerAddress];
      }
      resetData();
+     prevWinningNumber = winningNumber;
    }
 
    function resetData() private {

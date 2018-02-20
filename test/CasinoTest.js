@@ -1,5 +1,6 @@
 // Unit Tests for Casino.sol
 var Casino = artifacts.require("Casino");
+require('truffle-test-utils').init();
 
 contract('Casino', function(accounts) {
   it("should say new player doesn't exist", async function() {
@@ -43,5 +44,27 @@ contract('Casino', function(accounts) {
     assert.equal(totalBet.toNumber(), 0);
     const totalBetCount = await casino.numberOfBets.call();
     assert.equal(totalBetCount.toNumber(), 0);
+  });
+
+  it("should distribute winnings properly", async function() {
+    const casino = await Casino.new();
+    const betAmt = 1;
+    const betCount = (await casino.maxAmountOfBets.call()).toNumber();
+    // start the betting
+    var lastContractCall;
+    for(var i=0; i<betCount; i++) {
+      const index = i % accounts.length;
+      lastContractCall = await casino.bet(i+1, {from: accounts[index], value: betAmt});
+    }
+    const winningNumber = (await casino.prevWinningNumber.call()).toNumber();
+    const winnings = betCount;
+    // check if winner received correct amount
+    assert.web3Event(lastContractCall, {
+      event: 'DistributePrize',
+      args: {
+        to: accounts[winningNumber-1],
+        value: winnings
+      }
+    }, 'Check if winner was paid the correct amount');
   });
 });

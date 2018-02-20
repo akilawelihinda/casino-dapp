@@ -31,5 +31,10 @@
     "truffle": "^4.0.6",
     "web3": "^1.0.0-beta.29",
     "webpack": "^3.10.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "lodash": "^4.17.5",
+    "truffle-test-utils": "0.0.1"
   }
 }
