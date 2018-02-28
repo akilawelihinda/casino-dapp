@@ -194,14 +194,15 @@ class App extends React.Component {
         "type": "function"
       }
     ])
-    this.state.ContractInstance = MyContract.at("0x1152743284d63f497a3a56d20bd0d295d3c78529")
-  }
-
+    this.accounts =  web3.eth.getAccounts((err, res) => {
+      this.accounts = res
+    })
+    this.state.ContractInstance = MyContract.at("0x1152743284d63f497a3a56d20bd0d295d3c78529") }
   componentDidMount(){
-      this.updateState()
-      this.setupListeners()
-      setInterval(this.updateState.bind(this), 10e3)
-   }
+    this.updateState()
+    this.setupListeners()
+    setInterval(this.updateState.bind(this), 10e3)
+  }
 
   updateState(){
     this.state.ContractInstance.minimumBet((err, result) => {
@@ -213,10 +214,7 @@ class App extends React.Component {
     })
     this.state.ContractInstance.totalBet((err, result) => {
       if(result != null){
-        this.setState({
-          totalBet: parseFloat(web3.fromWei(result, 'ether'))
-        })
-      }
+        this.setState({ totalBet: parseFloat(web3.fromWei(result, 'ether')) }) }
     })
     this.state.ContractInstance.numberOfBets((err, result) => {
       if(result != null){
@@ -259,7 +257,7 @@ class App extends React.Component {
     } else {
       this.state.ContractInstance.bet(number, {
         gas: 300000,
-        from: web3.eth.accounts[0],
+        from: this.accounts[0],
         value: web3.toWei(bet, 'ether')
       }, (err, result) => {
         cb()
