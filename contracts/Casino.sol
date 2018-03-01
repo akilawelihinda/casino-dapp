@@ -5,11 +5,12 @@ contract Casino {
    uint public minimumBet;
    uint public totalBet;
    uint public numberOfBets;
-   uint public maxAmountOfBets = 7;
+   uint public maxAmountOfBets = 3;
    uint public minBetNumber = 1;
    uint public maxBetNumber = 10;
    uint public prevWinningNumber = 0;
    address[] players;
+   uint[] activeNumbers;
 
    event DistributePrize(address indexed to, uint value);
 
@@ -41,34 +42,22 @@ contract Casino {
      playerInfo[msg.sender].numberSelected = number;
      totalBet += msg.value;
      players.push(msg.sender);
+     if(amountBetPerNumber[number] == 0) {
+       activeNumbers.push(number);
+     }
      amountBetPerNumber[number] += msg.value;
      numberOfBets++;
 
      if(numberOfBets >= maxAmountOfBets) generateNumberWinner();
    }
 
-   // Generates a random number between 1 and 10
+   // Generates a random number between min and max possible numbers
    // TODO: Very primitive random number generator. Make it more secure
    function generateNumberWinner() private {
-     uint random_num = block.number % 10 + 1;
-     uint winning_num = pickWinningNum(random_num);
+     uint random_num = block.number;
+     uint winning_index = random_num % activeNumbers.length;
+     uint winning_num = activeNumbers[winning_index];
      distributePrizes(winning_num);
-   }
-
-   // Pick a winning number that was bet on
-   // NOTE: Very inefficient when the bet numbers have a big range
-   function pickWinningNum(uint random_num) private constant returns(uint){
-     uint winning_num = 0;
-     uint index = 0;
-     uint possibleNumbers = maxBetNumber - minBetNumber + 1;
-     while(random_num > 0) {
-       if(amountBetPerNumber[index] != 0) {
-         winning_num = index;
-         random_num--;
-       }
-       index = (index + 1) % possibleNumbers;
-     }
-     return winning_num + 1;
    }
 
    function distributePrizes(uint winningNumber) private {
@@ -89,6 +78,7 @@ contract Casino {
 
    function resetData() private {
      players.length = 0;
+     activeNumbers.length = 0;
      totalBet = 0;
      numberOfBets = 0;
      // reset all bet counters to 0
