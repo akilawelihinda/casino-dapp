@@ -19,7 +19,7 @@ class App extends React.Component {
     }else{
       this.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
     }
-    const MyContract = web3.eth.contract([
+    const CasinoContract = web3.eth.contract([
       {
         "constant": true,
         "inputs": [],
@@ -197,7 +197,8 @@ class App extends React.Component {
     this.accounts =  web3.eth.getAccounts((err, res) => {
       this.accounts = res
     })
-    this.state.ContractInstance = MyContract.at("0x1152743284d63f497a3a56d20bd0d295d3c78529") }
+    this.state.ContractInstance = CasinoContract.at("0x6d1c7acc86da9e83197280eb8856a39f5e6c6b09")
+  }
   componentDidMount(){
     this.updateState()
     this.setupListeners()
@@ -260,6 +261,7 @@ class App extends React.Component {
         from: this.accounts[0],
         value: web3.toWei(bet, 'ether')
       }, (err, result) => {
+        console.log(result);
         cb()
       })
     }

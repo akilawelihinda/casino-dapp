@@ -23845,7 +23845,7 @@ var App = function (_React$Component) {
     } else {
       _this.web3 = new _web2.default(new _web2.default.providers.HttpProvider("http://localhost:8545"));
     }
-    var MyContract = web3.eth.contract([{
+    var CasinoContract = web3.eth.contract([{
       "constant": true,
       "inputs": [],
       "name": "totalBet",
@@ -23984,7 +23984,8 @@ var App = function (_React$Component) {
     _this.accounts = web3.eth.getAccounts(function (err, res) {
       _this.accounts = res;
     });
-    _this.state.ContractInstance = MyContract.at("0x1152743284d63f497a3a56d20bd0d295d3c78529");return _this;
+    _this.state.ContractInstance = CasinoContract.at("0x6d1c7acc86da9e83197280eb8856a39f5e6c6b09");
+    return _this;
   }
 
   _createClass(App, [{
@@ -24061,6 +24062,7 @@ var App = function (_React$Component) {
           from: this.accounts[0],
           value: web3.toWei(bet, 'ether')
         }, function (err, result) {
+          console.log(result);
           cb();
         });
       }

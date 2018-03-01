@@ -20,7 +20,8 @@ contract('Casino', function(accounts) {
     const casino = await Casino.new();
     const betAmt = 1;
     const betNumber = 4;
-    const playerCount = 4;
+    var maxBetCount = await casino.maxAmountOfBets.call();
+    const playerCount = maxBetCount - 1;
     for(var i=0; i<playerCount; i++) {
       await casino.bet(betNumber, {from: accounts[i], value: betAmt});
     }
@@ -33,9 +34,8 @@ contract('Casino', function(accounts) {
   it("should reset player info after distributing winnings", async function() {
     const casino = await Casino.new();
     const betAmt = 1;
-    var betCount = await casino.maxAmountOfBets.call();
-    betCount = betCount.toNumber();
-    const betNumber = 4;
+    var betCount = (await casino.maxAmountOfBets.call()).toNumber();
+    const betNumber = 2;
     for(var i=0; i<betCount; i++) {
       const index = i % accounts.length;
       await casino.bet(betNumber, {from: accounts[index], value: betAmt});
