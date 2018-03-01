@@ -23984,7 +23984,7 @@ var App = function (_React$Component) {
     _this.accounts = web3.eth.getAccounts(function (err, res) {
       _this.accounts = res;
     });
-    _this.state.ContractInstance = CasinoContract.at("0x6d1c7acc86da9e83197280eb8856a39f5e6c6b09");
+    _this.state.ContractInstance = CasinoContract.at("0x7fc0f7ae3280fbef55952c5c69982dd9f3c4426f");
     return _this;
   }
 

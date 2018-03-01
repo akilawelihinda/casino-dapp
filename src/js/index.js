@@ -197,7 +197,7 @@ class App extends React.Component {
     this.accounts =  web3.eth.getAccounts((err, res) => {
       this.accounts = res
     })
-    this.state.ContractInstance = CasinoContract.at("0x6d1c7acc86da9e83197280eb8856a39f5e6c6b09")
+    this.state.ContractInstance = CasinoContract.at("0x7fc0f7ae3280fbef55952c5c69982dd9f3c4426f")
   }
   componentDidMount(){
     this.updateState()
