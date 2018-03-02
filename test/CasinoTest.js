@@ -58,13 +58,17 @@ contract('Casino', function(accounts) {
     }
     const winningNumber = (await casino.prevWinningNumber.call()).toNumber();
     const winnings = betCount;
+    const events = lastContractCall['logs'].filter(entry => entry.event === 'DistributePrize');
+    assert(events.length == 1);
+    const event_args = events[0].args;
+    const expected_args = {
+      to: accounts[winningNumber-1],
+      value: String(winnings)
+    };
     // check if winner received correct amount
-    assert.web3Event(lastContractCall, {
-      event: 'DistributePrize',
-      args: {
-        to: accounts[winningNumber-1],
-        value: winnings
-      }
-    }, 'Check if winner was paid the correct amount');
+    assert(
+      JSON.stringify(event_args) === JSON.stringify(expected_args),
+      'Check if winner was paid the correct amount'
+    );
   });
 });

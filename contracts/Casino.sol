@@ -12,6 +12,8 @@ contract Casino {
    address[] players;
    uint[] activeNumbers;
 
+   event UserBet(address indexed user, uint indexed number, uint value);
+   event WinningNumberSelected(uint number, uint prizeTotal);
    event DistributePrize(address indexed to, uint value);
 
    struct Player {
@@ -47,6 +49,7 @@ contract Casino {
      }
      amountBetPerNumber[number] += msg.value;
      numberOfBets++;
+     UserBet(msg.sender, number, msg.value);
 
      if(numberOfBets >= maxAmountOfBets) generateNumberWinner();
    }
@@ -57,6 +60,7 @@ contract Casino {
      uint random_num = block.number;
      uint winning_index = random_num % activeNumbers.length;
      uint winning_num = activeNumbers[winning_index];
+     WinningNumberSelected(winning_num, totalBet);
      distributePrizes(winning_num);
    }
 
