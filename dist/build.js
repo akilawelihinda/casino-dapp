@@ -23837,7 +23837,9 @@ var App = function (_React$Component) {
       numberOfBets: 0,
       minimumBet: 0,
       totalBet: 0,
-      maxAmountOfBets: 0
+      maxAmountOfBets: 0,
+      winningNumberEventMessage: '',
+      userBetEventMessage: ''
     };
     if (typeof web3 != 'undefined') {
       console.log("Using web3 detected from external source like Metamask");
@@ -23903,6 +23905,17 @@ var App = function (_React$Component) {
     }, {
       "constant": true,
       "inputs": [],
+      "name": "maxAmountOfBets",
+      "outputs": [{
+        "name": "",
+        "type": "uint256"
+      }],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }, {
+      "constant": true,
+      "inputs": [],
       "name": "prevWinningNumber",
       "outputs": [{
         "name": "",
@@ -23926,16 +23939,21 @@ var App = function (_React$Component) {
       "stateMutability": "view",
       "type": "function"
     }, {
-      "constant": true,
+      "constant": false,
       "inputs": [],
-      "name": "maxAmountOfBets",
-      "outputs": [{
-        "name": "",
+      "name": "kill",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }, {
+      "inputs": [{
+        "name": "_minimumBet",
         "type": "uint256"
       }],
       "payable": false,
-      "stateMutability": "view",
-      "type": "function"
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     }, {
       "payable": true,
       "stateMutability": "payable",
@@ -23954,6 +23972,36 @@ var App = function (_React$Component) {
       "name": "DistributePrize",
       "type": "event"
     }, {
+      "anonymous": false,
+      "inputs": [{
+        "indexed": true,
+        "name": "user",
+        "type": "address"
+      }, {
+        "indexed": true,
+        "name": "number",
+        "type": "uint256"
+      }, {
+        "indexed": false,
+        "name": "value",
+        "type": "uint256"
+      }],
+      "name": "UserBet",
+      "type": "event"
+    }, {
+      "anonymous": false,
+      "inputs": [{
+        "indexed": false,
+        "name": "number",
+        "type": "uint256"
+      }, {
+        "indexed": false,
+        "name": "prizeTotal",
+        "type": "uint256"
+      }],
+      "name": "WinningNumberSelected",
+      "type": "event"
+    }, {
       "constant": false,
       "inputs": [{
         "name": "number",
@@ -23964,27 +24012,11 @@ var App = function (_React$Component) {
       "payable": true,
       "stateMutability": "payable",
       "type": "function"
-    }, {
-      "inputs": [{
-        "name": "_minimumBet",
-        "type": "uint256"
-      }],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    }, {
-      "constant": false,
-      "inputs": [],
-      "name": "kill",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
     }]);
     _this.accounts = web3.eth.getAccounts(function (err, res) {
       _this.accounts = res;
     });
-    _this.state.ContractInstance = CasinoContract.at("0x7fc0f7ae3280fbef55952c5c69982dd9f3c4426f");
+    _this.state.ContractInstance = CasinoContract.at("0x34146ed7b2745bc5ac6f58713574f2f6eb5dc498");
     return _this;
   }
 
@@ -23992,8 +24024,38 @@ var App = function (_React$Component) {
     key: 'componentDidMount',
     value: function componentDidMount() {
       this.updateState();
+      this.setContractEventWatchers();
       this.setupListeners();
       setInterval(this.updateState.bind(this), 10e3);
+    }
+  }, {
+    key: 'setContractEventWatchers',
+    value: function setContractEventWatchers() {
+      var self = this;
+      var UserBetEvent = this.state.ContractInstance.UserBet({});
+      UserBetEvent.watch(function (error, result) {
+        if (!error) {
+          var address = result.args.user;
+          var betNumber = result.args.number;
+          console.log(result.args);
+          var betValue = parseFloat(web3.fromWei(result.args.value, 'ether'));
+          self.state.userBetEventMessage = 'User ' + address + ' bet ' + betValue + ' ether on #' + betNumber;
+        } else {
+          console.log(error);
+        }
+      });
+
+      var WinningNumberEvent = this.state.ContractInstance.WinningNumberSelected({});
+      WinningNumberEvent.watch(function (error, result) {
+        if (!error) {
+          var winningNumber = result.args.number;
+          var prizeTotal = parseFloat(web3.fromWei(result.args.prizeTotal, 'ether'));
+          self.state.winningNumberEventMessage = 'The chosen winning number was ' + winningNumber + ' and the pot total is ' + prizeTotal + ' eth';
+        } else {
+          this.state.winningNumberEventMessage = 'There was an error fetching the winning number';
+          console.log(error);
+        }
+      });
     }
   }, {
     key: 'updateState',
@@ -24062,7 +24124,6 @@ var App = function (_React$Component) {
           from: this.accounts[0],
           value: web3.toWei(bet, 'ether')
         }, function (err, result) {
-          console.log(result);
           cb();
         });
       }
@@ -24227,6 +24288,16 @@ var App = function (_React$Component) {
             null,
             '10'
           )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'user-bet-message' },
+          this.state.userBetEventMessage
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'winning-number-message' },
+          this.state.winningNumberEventMessage
         )
       );
     }

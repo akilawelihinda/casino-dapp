@@ -34,7 +34,8 @@ contract Casino {
    function kill() public {
       if(msg.sender == owner)
          selfdestruct(owner);
-   } // Lets a user bet on a number between 1 and 10
+   }
+
    function bet(uint number) public payable {
      assert(checkPlayerExists(msg.sender) == false);
      assert(number>=minBetNumber && number<=maxBetNumber);
